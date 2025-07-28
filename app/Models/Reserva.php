@@ -15,6 +15,7 @@ class Reserva extends Model
         'nombre',
         'telefono',
         'fecha_reserva',
+        'hora_reserva',
         'servicio',
         'estado',
     ];

@@ -22,21 +22,21 @@ class ReservaController extends Controller
             'hora' => 'required|date_format:H:i:s',
         ]);
 
-        // Combinar fecha y hora en un solo datetime
-        $fechaCompleta = Carbon::createFromFormat('Y-m-d H:i:s', $request->fecha . ' ' . $request->hora);
-
-        // Verificar si ya existe una reserva para ese momento exacto
-        $existe = Reserva::where('fecha_reserva', $fechaCompleta)->exists();
+        // Verificar si ya existe una reserva para esa fecha y hora
+        $existe = Reserva::where('fecha_reserva', $request->fecha)
+                        ->where('hora_reserva', $request->hora)
+                        ->exists();
 
         if ($existe) {
             return redirect()->route('reservas.create')->with('error', 'El turno ya está reservado en ese horario.');
         }
 
-        // Crear la reserva
+        // Crear la reserva con campos separados
         Reserva::create([
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
-            'fecha_reserva' => $fechaCompleta,
+            'fecha_reserva' => $request->fecha,
+            'hora_reserva' => $request->hora, // Asegúrate de incluir este campo
             'servicio' => 'No especificado',
             'estado' => 'pendiente',
         ]);

@@ -327,54 +327,60 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
+    const calendarEl = document.getElementById('calendar');
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: 'es',
-        initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
-        nowIndicator: true,
-        contentHeight: 'auto',
-        handleWindowResize: true,
-        aspectRatio: 1.35,
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: window.innerWidth < 768 ? '' : 'dayGridMonth,timeGridWeek,listWeek'
-        },
-        dayMaxEventRows: true,
-        events: [
-          @foreach($reservas as $reserva)
-            {
-              title: @json($reserva->nombre),
-              start: @json(\Carbon\Carbon::parse($reserva->fecha_reserva . ' ' . $reserva->hora)->toIso8601String()),
-              backgroundColor: '{{ $reserva->estado === "listo" ? "#28a745" : "#dc3545" }}',
-              borderColor: '{{ $reserva->estado === "listo" ? "#28a745" : "#dc3545" }}',
-              extendedProps: {
-                id: {{ $reserva->id }},
-                telefono: @json($reserva->telefono),
-                estado: @json($reserva->estado),
-                hora: @json(\Carbon\Carbon::parse($reserva->fecha_reserva)->format('H:i:s')),
-              }
-            },
-          @endforeach
-        ],
-        eventClick: function(info) {
-          const turno = info.event;
-          const props = turno.extendedProps;
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      locale: 'es',
+      timeZone: 'America/Argentina/Catamarca',
+      initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
+      nowIndicator: true,
+      contentHeight: 'auto',
+      handleWindowResize: true,
+      aspectRatio: 1.35,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: window.innerWidth < 768 ? '' : 'dayGridMonth,timeGridWeek,listWeek'
+      },
+      dayMaxEventRows: true,
+      events: [
+        @foreach($reservas as $reserva)
+          {
+            title: @json($reserva->nombre),
+            start: '{{ $reserva->fecha_reserva }}T{{ $reserva->hora_reserva }}',
+            backgroundColor: '{{ $reserva->estado === "listo" ? "#28a745" : "#dc3545" }}',
+            borderColor: '{{ $reserva->estado === "listo" ? "#28a745" : "#dc3545" }}',
+            extendedProps: {
+              id: {{ $reserva->id }},
+              telefono: @json($reserva->telefono),
+              estado: @json($reserva->estado),
+              hora: '{{ $reserva->hora_reserva }}',
+              fecha: '{{ $reserva->fecha_reserva }}'
+            }
+          },
+        @endforeach
+      ],
+          eventClick: function(info) {
+      const turno = info.event;
+      const props = turno.extendedProps;
 
-          document.getElementById('modalTurnoId').value = props.id;
-          document.getElementById('modalTurnoNombre').textContent = turno.title;
-          document.getElementById('modalTurnoTelefono').textContent = props.telefono;
-          document.getElementById('modalTurnoFechaHora').textContent = turno.start.toLocaleString();
-          document.getElementById('nuevoEstado').value = props.estado;
-          document.getElementById('nuevaFecha').value = props.fecha;
-          document.getElementById('nuevaHora').value = props.hora;
+      // Mostrar fecha y hora por separado
+      const fechaLegible = props.fecha.split('-').reverse().join('/');
+      const horaLegible = props.hora.slice(0, 5); // HH:mm
 
-          $('#modalTurno').modal('show');
-        }
-      });
+      document.getElementById('modalTurnoId').value = props.id;
+      document.getElementById('modalTurnoNombre').textContent = turno.title;
+      document.getElementById('modalTurnoTelefono').textContent = props.telefono;
+      document.getElementById('modalTurnoFechaHora').textContent = `${fechaLegible} ${horaLegible} hs`;
+      document.getElementById('nuevoEstado').value = props.estado;
+      document.getElementById('nuevaFecha').value = props.fecha;
+      document.getElementById('nuevaHora').value = props.hora;
 
-      calendar.render();
+      $('#modalTurno').modal('show');
+    }
     });
+
+    calendar.render();
+  });
   </script>
 @endpush

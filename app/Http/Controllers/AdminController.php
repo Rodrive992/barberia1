@@ -21,7 +21,9 @@ class AdminController extends Controller
         $reserva->estado = $request->estado;
 
         if ($request->filled('fecha') && $request->filled('hora')) {
-            $reserva->fecha_reserva = $request->fecha . ' ' . $request->hora;
+            $reserva->fecha_reserva = $request->fecha;
+            $reserva->hora_reserva = $request->hora;
+
         }
 
         $reserva->save();
